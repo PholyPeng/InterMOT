@@ -196,15 +196,13 @@ class TrackingNet(nn.Module):
 
         M_matrixes0 = det_info['M_matrixes'].squeeze(0)  # N+M(6) x 3 x 3
 
-        M_matrixes1 = torch.cat(
-            [torch.div(M_matrixes0[:, :2, :], 4), M_matrixes0[:, 2:, :]],
-            dim=1)
+        M_matrixes1 = torch.cat([torch.div(M_matrixes0[:, :2, :], 4), M_matrixes0[:, 2:, :]],dim=1)
         appear1 = appearance_conv1(dets)
-        #appear1 = appearance_pool1(appear1)
-        #print("appear1.shape",appear1.shape) 6 x 128 x 56 x 56
+
+        # print("appear1.shape",appear1.shape) 6 x 128 x 56 x 56
         points_xy1, points_xyz1, points1, points_split1 = pointnet_sa1(
             points_xy0, points_xyz0, points0, points_split0)
-        # appear1, points1 = self.fuse_net1(points_xy1, appear1, points1, points_split1, M_matrixes1)
+        appear1, points1 = self.fuse_net1(points_xy1, appear1, points1, points_split1, M_matrixes1)
         appear_pool_out.append(appear1)
         trans2 = stn2(points1)
         trans.append(trans2)
@@ -215,19 +213,17 @@ class TrackingNet(nn.Module):
         # 2nd layer
         M_matrixes2 = torch.cat([torch.div(M_matrixes1[:, :2, :], 2), M_matrixes1[:, 2:, :]],dim=1)
         appear2 = appearance_conv2(appear1)
-        #appear2 = appearance_pool2(appear2)
         points_xy2, points_xyz2, points2, points_split2 = pointnet_sa2(
             points_xy1, points_xyz1, points1, points_split1)
-        # appear2, points2 = self.fuse_net2(points_xy2, appear2, points2, points_split2, M_matrixes2)
+        appear2, points2 = self.fuse_net2(points_xy2, appear2, points2, points_split2, M_matrixes2)
         appear_pool_out.append(appear2)
 
         # 3rd layer
         M_matrixes3 = torch.cat([torch.div(M_matrixes2[:, :2, :], 2), M_matrixes2[:, 2:, :]],dim=1)
         appear3 = appearance_conv3(appear2)
-        #appear3 = appearance_pool3(appear3)
         points_xy3, points_xyz3, points3, points_split3 = pointnet_sa3(
             points_xy2, points_xyz2, points2, points_split2)
-        # appear3, points3 = self.fuse_net3(points_xy3, appear3, points3, points_split3, M_matrixes3)
+        appear3, points3 = self.fuse_net3(points_xy3, appear3, points3, points_split3, M_matrixes3)
         appear_pool_out.append(appear3)
 
         # 4th layer
@@ -235,10 +231,9 @@ class TrackingNet(nn.Module):
             [torch.div(M_matrixes3[:, :2, :], 2), M_matrixes3[:, 2:, :]],
             dim=1)
         appear4 = appearance_conv4(appear3)
-        #appear4 = appearance_pool4(appear4)
         points_xy4, points_xyz4, points4, points_split4 = pointnet_sa4(
             points_xy3, points_xyz3, points3, points_split3)
-        # appear4, points4 = self.fuse_net4(points_xy4, appear4, points4, points_split4, M_matrixes4)
+        appear4, points4 = self.fuse_net4(points_xy4, appear4, points4, points_split4, M_matrixes4)
         appear_pool_out.append(appear4)
 
         appear_skippool_out = []
