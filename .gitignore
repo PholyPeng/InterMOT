@@ -7,7 +7,7 @@ dist
 output/
 data/*
 backup
-__pycache__
+*__pycache__*
 checkpoints/
 .vscode/
 logs/
